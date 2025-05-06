@@ -1,0 +1,37 @@
+{
+  "name": "agently-mcp",
+  "version": "1.0.7",
+  "description": "A Model Context Protocol (MCP) server providing a 'fetch_agents' tool to discover public A2A agents on the Agently platform via its public API.",
+  "author": "Agently",
+  "keywords": [
+    "mcp",
+    "a2a",
+    "ai",
+    "agent",
+    "model-context-protocol",
+    "agently",
+    "agently-mcp",
+    "discovery"
+  ],
+  "type": "module",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "bin": {
+    "mcp-server": "./build/index.js"
+  },
+  "files": [
+    "build",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc && node -e \"const fs = require('fs'); const path = 'build/index.js'; const data = fs.readFileSync(path); fs.writeFileSync(path, Buffer.concat([Buffer.from('#!/usr/bin/env node\\n'), data])); fs.chmodSync(path, '755');\"",
+    "inspector": "npx @modelcontextprotocol/inspector"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
+  }
+}
