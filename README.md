@@ -128,4 +128,4 @@ This launches a local web UI for monitoring requests and responses over stdio.
 
 ---
 
-*For more details on the Agently Public API and MCP specification, refer to their respective documentation.*
+*For more details on the Agently Public API and MCP specification, refer to the respective documentation.*
