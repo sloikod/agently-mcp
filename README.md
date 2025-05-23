@@ -44,8 +44,8 @@ All parameters are passed as properties in the arguments object:
 
 Returns a `CallToolResult` containing:
 
-* `content`: A JSON-stringified array of `found_agents` matching the query.
-* `_meta.pagination`: The pagination details from the Agently API response.
+* A JSON-stringified array of `found_agents` matching the query.
+* The pagination details from the Agently API response.
 
 ## Installation
 
