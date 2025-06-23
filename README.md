@@ -33,11 +33,12 @@ All parameters are passed as properties in the arguments object:
 | `inputModes`        | `string[]`                | —       | Filter by input MIME types (AND logic, max 20 items)    |
 | `outputModes`       | `string[]`                | —       | Filter by output MIME types (AND logic, max 20 items)   |
 | `skillTags`         | `string[]`                | —       | Filter by skill tags (AND logic, max 20 items)          |
-| `sortByName`        | `'a-z'` \| `'z-a'`        | —       | Sort alphabetically                                     |
-| `sortByCreatedAt`   | `'newest'` \| `'oldest'`  | —       | Sort by creation date                                   |
-| `sortByUpdatedAt`   | `'newest'` \| `'oldest'`  | —       | Sort by last update                                     |
-| `sortBySuccessRate` | `'highest'` \| `'lowest'` | —       | Sort by agent success rate                              |
-| `sortByUsage`       | `'highest'` \| `'lowest'` | —       | Sort by usage count                                     |
+| `sortByName`        | `'a-z'` `'z-a'`        | —       | Sort alphabetically                                     |
+| `sortByCreatedAt`   | `'newest'` `'oldest'`  | —       | Sort by creation date                                   |
+| `sortByUpdatedAt`   | `'newest'` `'oldest'`  | —       | Sort by last update                                     |
+| `sortBySuccessRate` | `'highest'` `'lowest'` | —       | Sort by agent success rate                              |
+| `sortByUsage`       | `'highest'` `'lowest'` | —       | Sort by usage count                                     |
+| `sortByViews`       | `'highest'` `'lowest'` | —       | Sort by views                                           |
 | `explanation`       | `string`                  | —       | Optional note passed to the API (for logging/tracing)   |
 
 ### Response
@@ -86,12 +87,35 @@ Configure your MCP client (e.g., Cursor, Claude Desktop) to use `agently-mcp`:
       "command": "npx",
       "args": [
         "-y",
-        "agently-mcp"
+        "agently-mcp@latest"
       ]
     }
   }
 }
 ```
+
+#### Using an API Key *(optional)*
+
+If you have an Agently API key that restricts access to a specific set of agents, pass it to the MCP server via the `AGENTLY_API_KEY` environment variable. When supplied, the server automatically adds a `Bearer` token to outgoing requests so that only the agents allowed for that key are returned.
+
+```json
+{
+  "mcpServers": {
+    "agently": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "agently-mcp@latest"
+      ],
+      "env": {
+        "AGENTLY_API_KEY": "YOUR_API_KEY_HERE"
+      }
+    }
+  }
+}
+```
+
+If `AGENTLY_API_KEY` is not provided, the server behaves exactly as before and returns all public agents.
 
 <details>
 <summary><strong>Windows Users</strong></summary>

@@ -30,6 +30,7 @@ const GetPublicAgentsQuerySchema = z.object({
     sortByUsage: z.enum(['highest', 'lowest']).optional(),
     sortByRequestPrice: z.enum(['highest', 'lowest']).optional(),
     sortByStreamingPrice: z.enum(['highest', 'lowest']).optional(),
+    sortByViews: z.enum(['highest', 'lowest']).optional(),
 });
 
 // Add the explanation field to the Zod schema
@@ -43,6 +44,10 @@ type AgentDiscoveryInput = z.infer<typeof GetPublicAgentsQuerySchemaWithExplanat
 // --- Configuration ---
 const AGENTS_API_BASE_URL = "https://agently.gg"; // <-- Hardcoded base URL
 const AGENT_API_ENDPOINT = `${AGENTS_API_BASE_URL}/api/agents/v1`;
+
+// Optional API key for accessing private/restricted agents
+// If provided, it will be sent as a Bearer token in the Authorization header.
+const AGENTLY_API_KEY = process.env.AGENTLY_API_KEY;
 
 /**
  * Create an MCP server instance using the Server class.
@@ -284,6 +289,7 @@ server.setRequestHandler(ListToolsRequestSchema, async (): Promise<ListToolsResu
                 sortByUsage: { type: "string", enum: ['highest', 'lowest'], description: "Sort by usage count" },
                 sortByRequestPrice: { type: "string", enum: ['highest', 'lowest'], description: "Sort by average request price" },
                 sortByStreamingPrice: { type: "string", enum: ['highest', 'lowest'], description: "Sort by average streaming price per second" },
+                sortByViews: { type: "string", enum: ['highest', 'lowest'], description: "Sort by views" },
                 explanation: { type: "string", description: "Optional explanation for the request (free text)" }
             },
         }
@@ -296,7 +302,7 @@ server.setRequestHandler(ListToolsRequestSchema, async (): Promise<ListToolsResu
  * Handler for calling tools.
  * Implements the logic for "fetch_agents".
  */
-server.setRequestHandler(CallToolRequestSchema, async (request): Promise<CallToolResult> => {
+server.setRequestHandler(CallToolRequestSchema, async (request: z.infer<typeof CallToolRequestSchema>): Promise<CallToolResult> => {
   // console.log("Received tool call request:", request); // Remove logging
 
   if (request.params.name === "fetch_agents") {
@@ -335,6 +341,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request): Promise<CallToo
       if (validatedInput.sortByUsage) params.set('sortByUsage', validatedInput.sortByUsage);
       if (validatedInput.sortByRequestPrice) params.set('sortByRequestPrice', validatedInput.sortByRequestPrice);
       if (validatedInput.sortByStreamingPrice) params.set('sortByStreamingPrice', validatedInput.sortByStreamingPrice);
+      if (validatedInput.sortByViews) params.set('sortByViews', validatedInput.sortByViews);
       if (validatedInput.explanation) params.set('explanation', validatedInput.explanation);
 
       // Manually replace %20 with + for API compatibility
@@ -345,7 +352,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request): Promise<CallToo
       try {
           const response = await fetch(apiUrl.toString(), {
               method: 'GET',
-              headers: { 'Accept': 'application/json' }
+              headers: {
+                  'Accept': 'application/json',
+                  ...(AGENTLY_API_KEY ? { 'Authorization': `Bearer ${AGENTLY_API_KEY}` } : {})
+              }
           });
 
           // console.log("API Response Status:", response.status); // Removed log
