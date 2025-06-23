@@ -1,6 +1,6 @@
 {
   "name": "agently-mcp",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "A Model Context Protocol (MCP) server providing a 'fetch_agents' tool to discover public A2A agents on the Agently platform via its public API.",
   "author": "Agently",
   "keywords": [
