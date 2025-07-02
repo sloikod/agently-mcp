@@ -32,6 +32,16 @@ const GetPublicAgentsQuerySchema = z.object({
     sortByRequestPrice: z.enum(['highest', 'lowest']).optional(),
     sortByStreamingPrice: z.enum(['highest', 'lowest']).optional(),
     sortByViews: z.enum(['highest', 'lowest']).optional(),
+    is_local: z.preprocess(
+        (val) => {
+            if (typeof val === 'string') {
+                // Treat "", "true", "1" as true (truthy)
+                return val.trim() === '' || val.toLowerCase() === 'true' || val === '1';
+            }
+            return val;
+        },
+        z.boolean()
+    ).optional(),
 });
 
 // Add the explanation field to the Zod schema
@@ -56,7 +66,7 @@ const AGENTLY_API_KEY = process.env.AGENTLY_API_KEY;
 const server = new Server(
   {
     name: "agently",
-    version: "1.0.11",
+    version: "1.0.12",
   },
   // Re-add capabilities definition for Server class
   {
@@ -288,6 +298,7 @@ server.setRequestHandler(ListToolsRequestSchema, async (): Promise<ListToolsResu
                 sortByRequestPrice: { type: "string", enum: ['highest', 'lowest'], description: "Sort by average request price" },
                 sortByStreamingPrice: { type: "string", enum: ['highest', 'lowest'], description: "Sort by average streaming price per second" },
                 sortByViews: { type: "string", enum: ['highest', 'lowest'], description: "Sort by views" },
+                is_local: { type: "boolean", description: "Set to true to fetch local agents instead of deployed agents" },
                 explanation: { type: "string", description: "Optional explanation for the request (free text)" }
             },
         }
@@ -340,6 +351,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request: z.infer<typeof C
       if (validatedInput.sortByRequestPrice) params.set('sortByRequestPrice', validatedInput.sortByRequestPrice);
       if (validatedInput.sortByStreamingPrice) params.set('sortByStreamingPrice', validatedInput.sortByStreamingPrice);
       if (validatedInput.sortByViews) params.set('sortByViews', validatedInput.sortByViews);
+      if (typeof validatedInput.is_local === 'boolean') params.set('is_local', String(validatedInput.is_local));
       if (validatedInput.explanation) params.set('explanation', validatedInput.explanation);
 
       // Manually replace %20 with + for API compatibility
@@ -376,6 +388,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request: z.infer<typeof C
                   isError: true,
                   content: [{ type: "text", text: "Received unexpected format from Agently API" }]
                };
+          }
+
+          // If no agents returned, provide a friendly message depending on filter
+          const agentsArray = Array.isArray(result.found_agents) ? result.found_agents : [];
+          if (agentsArray.length === 0) {
+              const noAgentsMsg = (validatedInput.is_local ? "No local agents found." : "No deployed agents found.");
+              return {
+                  content: [{ type: "text", text: noAgentsMsg }],
+                  _meta: {
+                      pagination: result.pagination,
+                  }
+              };
           }
 
           // Wrap the result in a prompt-injection-safe envelope with a random UUID
