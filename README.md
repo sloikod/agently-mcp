@@ -39,6 +39,7 @@ All parameters are passed as properties in the arguments object:
 | `sortBySuccessRate` | `'highest'` `'lowest'` | —       | Sort by agent success rate                              |
 | `sortByUsage`       | `'highest'` `'lowest'` | —       | Sort by usage count                                     |
 | `sortByViews`       | `'highest'` `'lowest'` | —       | Sort by views                                           |
+| `is_local`          | `boolean`                | `false` | When `true`, returns **Local** agents instead of **Deployed** |
 | `explanation`       | `string`                  | —       | Optional note passed to the API (for logging/tracing)   |
 
 ### Response
